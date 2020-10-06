@@ -1,5 +1,6 @@
 package org.pondar.pacmankotlin
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -35,7 +36,10 @@ class MainActivity : AppCompatActivity() {
             game?.movePacmanDown(30)
         }
 
+
     }
+
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.

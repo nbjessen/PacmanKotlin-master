@@ -4,11 +4,13 @@ package org.pondar.pacmankotlin
 class GoldCoin(x: Int, y: Int) {
 
     var taken = false
+    var points: Int = 10
     var coinx: Int = x
     var coiny: Int = y
     override fun toString(): String {
         return "GoldCoin(taken=$taken, coinx=$coinx, coiny=$coiny)"
     }
+
 
 
 }
