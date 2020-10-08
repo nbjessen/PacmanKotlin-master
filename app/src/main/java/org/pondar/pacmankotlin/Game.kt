@@ -3,12 +3,12 @@ package org.pondar.pacmankotlin
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Rect
-import android.os.Build
 import android.util.Log
 import android.widget.TextView
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import java.util.*
+import javax.xml.transform.Transformer
+import kotlin.collections.ArrayList
 
 
 /**
@@ -18,26 +18,30 @@ import java.util.*
 
 class Game(private var context: Context,view: TextView) {
 
-        private var pointsView: TextView = view
-        private var points : Int = 0
-        //bitmap of the pacman
-        var pacBitmap: Bitmap
-        var goldBitmap: Bitmap
-        var pacx: Int = 0
-        var pacy: Int = 0
+    private var pointsView: TextView = view
+    private var points : Int = 0
 
 
-        //did we initialize the coins?
-        var coinsInitialized = false
+    //bitmaps
+    var pacBitmap: Bitmap
+    var goldBitmap: Bitmap
+    var ghostBitmap: Bitmap
+    var pacx: Int = 0
+    var pacy: Int = 0
+    var running = false
 
+    var direction: Int = 0
 
-        //the list of goldcoins - initially empty
-        var coins = ArrayList<GoldCoin>()
+    //the list of goldcoins
+    var coins = ArrayList<GoldCoin>()
 
-        //a reference to the gameview
-        private var gameView: GameView? = null
-        private var h: Int = 0
-        private var w: Int = 0 //height and width of screen
+    //list of enemies
+    var ghosts = ArrayList<Enemy>(1)
+
+    //a reference to the gameview
+    private var gameView: GameView? = null
+    private var h: Int = 0
+    private var w: Int = 0 //height and width of screen
 
 
     init {
@@ -46,37 +50,44 @@ class Game(private var context: Context,view: TextView) {
     init {
         goldBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin)
     }
-
+    init {
+        ghostBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ghost)
+    }
 
     fun setGameView(view: GameView) {
         this.gameView = view
     }
 
-    //TODO initialize goldcoins also here
     fun initializeGoldcoins()
     {
        for (i in 0..4){
            val coin = GoldCoin(0, 0)
-            coin.coinx = Random().nextInt(900)
-            coin.coiny = Random().nextInt(1300)
+            coin.coinx = Random().nextInt(950)
+            coin.coiny = Random().nextInt(1000)
            coins.add(coin)
         }
+    }
 
-        //DO Stuff to initialize the array list with coins.
-        coinsInitialized = true
-        Log.d("coins", "$coins")
+    fun initializeEnimies()
+    {
+            val ghost = Enemy(0, 0)
+            ghost.enemyx = Random().nextInt(900)
+            ghost.enemyy = Random().nextInt(400)
+            ghosts.add(ghost)
     }
 
     fun newGame() {
         coins.clear()
-        pacx = 400
-        pacy = 400 //just some starting coordinates - you can change this.
-        //reset the points
-        coinsInitialized = false
+        ghosts.clear()
+        pacx = 450
+        pacy = 600
         initializeGoldcoins()
+        initializeEnimies()
         points = 0
         pointsView.text = "${context.resources.getString(R.string.points)} $points"
         gameView?.invalidate() //redraw screen
+        direction = 0
+        running = true
     }
     fun setSize(h: Int, w: Int) {
         this.h = h
@@ -119,35 +130,112 @@ class Game(private var context: Context,view: TextView) {
         }
     }
 
-    //TODO check if the pacman touches a gold coin
-    //and if yes, then update the neccesseary data
-    //for the gold coins and the points
-    //so you need to go through the arraylist of goldcoins and
-    //check each of them for a collision with the pacman
+    fun moveGhostRight(pixels: Int) {
+        for (ghost in ghosts){
+            if (ghost.enemyx + pixels + ghostBitmap.width < w){
+                ghost.enemyx += pixels
+                gameView!!.invalidate()
+            }
+        }
+    }
+    fun moveGhostLeft(pixels: Int) {
+        for (ghost in ghosts){
+            if (ghost.enemyx - pixels > 0){
+                ghost.enemyx -= pixels
+                gameView!!.invalidate()
+            }
+        }
+    }
+    fun moveGhostUp(pixels: Int) {
+        for (ghost in ghosts){
+            if (ghost.enemyy - pixels > 0){
+                ghost.enemyy -= pixels
+                gameView!!.invalidate()
+            }
+        }
+    }
+    fun moveGhostDown(pixels: Int) {
+        for (ghost in ghosts){
+            if (ghost.enemyy + pixels + ghostBitmap.height < h){
+                ghost.enemyy += pixels
+                gameView!!.invalidate()
+            }
+        }
+    }
 
     fun doCollisionCheck() {
+        //Pacman
+        val h1 = pacBitmap.height
+        val w1 = pacBitmap.width
+        val x1 = pacx
+        val y1 = pacy
+        //Collision check for ghosts
+        for (ghost in ghosts){
+            //Ghost
+            val h3 = ghostBitmap.height
+            val w3 = ghostBitmap.width
+            val x3 = ghost.enemyx
+            val y3 = ghost.enemyy
+            //Ghost collision
+            var ghostCollisionX = false
+            var ghostCollisionY = false
+            //Check which position is lesser on x
+            if (x1 < x3){
+                //check if there is gap on x axis
+                if (x1 + w1 > x3){
+                    ghostCollisionX = true
+                }
+            }
+            else{
+                //check if there is a gap on x axis
+                if (x3 + w3 > x1){
+                    ghostCollisionX = true
+                }
+            }
+
+            //check which position is lesser on y
+            if (y1 < y3){
+                //check if there is a gab on y axis
+                if (y1 + h1 > y3){
+                    ghostCollisionY = true
+                }
+            }
+            else{
+                //check if there is a gab on y axis
+                if (y3 + h3 > y1){
+                    ghostCollisionY = true
+                }
+            }
+            if (ghostCollisionX && ghostCollisionY){
+                   if (isDead()){
+                       running = false
+                       direction = 0
+                       Log.d("lost", "Level Lost")
+                   }
+                }
+            }
+
+        //Collision check for coins
         for (coin in coins){
-            var h1 = pacBitmap.height
-            var w1 = pacBitmap.width
-            var x1 = pacx
-            var y1 = pacy
-            var h2 = goldBitmap.height
-            var w2 = goldBitmap.width
-            var x2 = coin.coinx
-            var y2 = coin.coiny
-            var xCollision = false
-            var yCollision = false
+            //Coin
+            val h2 = goldBitmap.height
+            val w2 = goldBitmap.width
+            val x2 = coin.coinx
+            val y2 = coin.coiny
+            //Coin collision
+            var coinCollisionX = false
+            var coinCollisionY = false
             //Check which position is lesser on x
             if (x1 < x2){
                 //check if there is gap on x axis
                 if (x1 + w1 > x2){
-                    xCollision = true
+                    coinCollisionX = true
                 }
             }
             else{
                 //check if there is a gap on x axis
                 if (x2 + w2 > x1){
-                    xCollision = true
+                    coinCollisionX = true
                 }
             }
 
@@ -155,31 +243,49 @@ class Game(private var context: Context,view: TextView) {
             if (y1 < y2){
                 //check if there is a gab on y axis
                 if (y1 + h1 > y2){
-                    yCollision = true
+                    coinCollisionY = true
                 }
             }
             else{
                 //check if there is a gab on y axis
                 if (y2 + h2 > y1){
-                    yCollision = true
+                    coinCollisionY = true
                 }
             }
-            if (xCollision && yCollision){
-                coin.taken = true
-                removeCoinAtPosition(coin.coinx, coin.coiny)
+            if (coinCollisionX && coinCollisionY){
+                if (coin.taken == true){
+                    continue
+                }
+                else{
+                    //update score and check if game is won
+                    coin.taken = true
+                    points += 5
+                    pointsView.text = "${context.resources.getString(R.string.points)} $points"
+                    if (isGameWon()){
+                        running = false
+                        direction = 0
+                        Log.d("win", "Level Completed")
+                    }
+                }
             }
         }
     }
-    fun removeCoinAtPosition(x: Int, y: Int){
-    
 
-
-        for(coin in coins) {
-            if (x==coin.coinx&&y==coin.coiny) {
-                points += 5
-                pointsView.text = "${context.resources.getString(R.string.points)} $points"
-
+    fun isGameWon(): Boolean{
+        for (coin in coins){
+            if (!coin.taken){
+                return false
             }
         }
+        return true
+    }
+
+    fun isDead(): Boolean{
+        for (ghost in ghosts){
+            if (!ghost.alive){
+                return false
+            }
+        }
+        return true
     }
 }

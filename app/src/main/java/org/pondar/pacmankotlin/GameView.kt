@@ -42,7 +42,7 @@ class GameView : View {
         w = canvas.width
         //update the size for the canvas to the game.
         game?.setSize(h, w)
-        Log.d("GAMEVIEW", "h = $h, w = $w")
+        //Log.d("GAMEVIEW", "h = $h, w = $w")
 
         //Making a new paint object
         val paint = Paint()
@@ -60,7 +60,14 @@ class GameView : View {
                         coin.coiny.toFloat(), paint)
             }
         }
-        game?.doCollisionCheck()
+
+        for (ghost in game?.ghosts!!){
+            if (ghost.alive){
+                canvas.drawBitmap(game!!.ghostBitmap, ghost.enemyx.toFloat(),
+                        ghost.enemyy.toFloat(), paint)
+            }
+        }
+
         super.onDraw(canvas)
     }
 

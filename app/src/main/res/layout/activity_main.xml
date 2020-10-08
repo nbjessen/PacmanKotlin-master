@@ -3,53 +3,98 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="org.pondar.pacmankotlin.MainActivity">
+    tools:context="org.pondar.pacmankotlin.MainActivity"
+    >
 
-
-    <TextView
-        android:id="@+id/pointsView"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/points"
-        android:textSize="24sp" />
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/continueLabel" />
+
+        <Button
+            android:id="@+id/stopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pause" />
+        <Button
+            android:id="@+id/nextLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/nextLevel" />
+
+
+    </LinearLayout>
 
     <!-- Notice how the custom view is referenced here with
     a full package path-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pointsView"
+            android:layout_width="155dp"
+            android:layout_height="wrap_content"
+            android:text="@string/points"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timer"
+            android:textSize="24sp" />
+    </LinearLayout>
+
     <org.pondar.pacmankotlin.GameView
         android:id="@+id/gameView"
         android:layout_width="match_parent"
-        android:layout_height="530dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
        />
 
-    <GridLayout
+    <LinearLayout
         android:id="@+id/table"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="4">
+        android:layout_gravity="center"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/moveLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="90dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/move_left" />
 
         <Button
             android:id="@+id/moveRight"
-            android:layout_width="wrap_content"
-            android:layout_height="90dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/move_right" />
 
         <Button
             android:id="@+id/moveUp"
-            android:layout_width="wrap_content"
-            android:layout_height="90dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/move_up" />
 
         <Button
             android:id="@+id/moveDown"
-            android:layout_width="wrap_content"
-            android:layout_height="90dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/move_down" />
-    </GridLayout>
+    </LinearLayout>
 
 </LinearLayout>
